@@ -115,8 +115,13 @@
             this.Controls.Add(this.Password_TextBox);
             this.Controls.Add(this.Login_TextBox);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "Form3";
+            this.Opacity = 0.8D;
+            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.TransparencyKey = System.Drawing.Color.White;
             this.ResumeLayout(false);
             this.PerformLayout();
 
