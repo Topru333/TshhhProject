@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+using System.Collections;
+
 
 namespace PaSaver
 {
@@ -19,64 +21,98 @@ namespace PaSaver
             get { return pages; }
             set {; }
         }
-        private string key1, key2;
+        VigenerCoder vc;
+        private Form1 F1;
         private string path;
         public string GetPath
         {
             get { return path; }
             set {; }
         }
-        public XmlReWr( string path, string key1, string key2, List<DataTable> tp = null)
+        public XmlReWr( Form1 f1,string path, ArrayList keys)
         {
-            this.key1 = key1;
-            this.key2 = key2;
-            pages = tp;
+            F1 = f1;
+            vc = new VigenerCoder(keys);
+            this.path = path;
+        }
+        public XmlReWr( Form1 f1, string path, ArrayList keys,List<DataTable> tabpages)
+        {
+            F1 = f1;
+            vc = new VigenerCoder(keys);
+            pages = tabpages;
             this.path = path;
         }
         public void WriteXml(XmlWriter writer)
         {
+            writer.WriteStartDocument(true);
             writer.WriteStartElement("Tabs");
-            WriteTabXml(writer,this.pages);
-            writer.WriteValue(true);
-            writer.WriteEndElement();
-
-        }
-        private void WriteTabXml(XmlWriter writer, List<DataTable> pages)
-        {
-            foreach(DataTable page in pages)
+            writer.WriteAttributeString("Value", Pages.Count.ToString());
+            foreach(DataTable Page in Pages)
             {
                 writer.WriteStartElement("Tab");
-                writer.WriteValue(page.Type);
-                WriteRowXml(writer, page);
-                writer.WriteEndElement();
-            }
-        }
-        private void WriteRowXml(XmlWriter writer, DataTable dt)
-        {
-            foreach (DataGridViewRow row in dt.Data.Rows)
-            {
-                writer.WriteStartElement("Row");
-                string Row = "";
-                int i = 0;
-                foreach (string a in ((Row)row.Tag).ArrayList.ToArray())
+                writer.WriteAttributeString("Type", vc.MultiEncode(Page.Type));
+
+                writer.WriteStartElement("Rows");
+                writer.WriteAttributeString("Value", Page.Data.RowCount.ToString());
+                foreach (DataGridViewRow row in Page.Data.Rows)
                 {
-                    if (i == 0)
-                    {
-                        Row = a + Row;
-                    }
-                    else
-                    {
-                        Row = a + "||" + Row;
-                    }
-                    i++;
+                    writer.WriteStartElement("Row");
+
+                    writer.WriteStartElement("Login");
+                    writer.WriteString(vc.MultiEncode(((Row)row.Tag).Login));
+                    writer.WriteEndElement();
+
+                    writer.WriteStartElement("Password");
+                    writer.WriteString(vc.MultiEncode(((Row)row.Tag).Password));
+                    writer.WriteEndElement();
+
+                    writer.WriteStartElement("Info");
+                    writer.WriteString(vc.MultiEncode(((Row)row.Tag).Info));
+                    writer.WriteEndElement();
+
+                    writer.WriteEndElement();
                 }
-                writer.WriteValue(Row);
+                writer.WriteEndElement();
                 writer.WriteEndElement();
             }
+            writer.WriteEndElement();
+            writer.WriteEndDocument();
         }
         public void ReadXml(XmlReader reader)
         {
+            reader.ReadStartElement("Tabs");
+            while (reader.Name == "Tab")
+            {
+                DataTable dt = new DataTable(F1, vc.MultiDecode(reader.GetAttribute("Type")));
+                Pages.Add(dt);
 
+                reader.ReadStartElement("Tab");
+
+                reader.ReadStartElement("Rows");
+                while (reader.Name == "Row")
+                {
+                    reader.ReadStartElement("Row");
+
+                    reader.ReadStartElement("Login");
+                    string Login = vc.MultiDecode(reader.ReadContentAsString());
+                    reader.ReadEndElement();
+
+                    reader.ReadStartElement("Password");
+                    string Password = vc.MultiDecode(reader.ReadContentAsString());
+                    reader.ReadEndElement();
+
+                    reader.ReadStartElement("Info");
+                    string Info = vc.MultiDecode(reader.ReadContentAsString());
+                    reader.ReadEndElement();
+
+                    dt.AddRowToData(new Row(Login, Password, Info));
+
+                    reader.ReadEndElement();
+                }
+                reader.ReadEndElement();
+                reader.ReadEndElement();
+            }
+            reader.ReadEndElement();
         }
         public XmlSchema GetSchema()
         {

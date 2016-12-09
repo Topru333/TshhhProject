@@ -7,7 +7,7 @@
     <ProjectGuid>{9A499593-58D6-435C-938E-A37089C5DC81}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>PaSaver</RootNamespace>
-    <AssemblyName>PaSaver</AssemblyName>
+    <AssemblyName>PaSaver 0.001b</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -47,8 +47,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>
-    </ApplicationIcon>
+    <ApplicationIcon>Icons8-Windows-8-Security-Key-Security.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>PaSaver.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -64,6 +66,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Form4.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form4.Designer.cs">
+      <DependentUpon>Form4.cs</DependentUpon>
+    </Compile>
     <Compile Include="XmlReWr.cs" />
     <Compile Include="Form2.cs">
       <SubType>Form</SubType>
@@ -95,6 +103,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Form3.resx">
       <DependentUpon>Form3.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form4.resx">
+      <DependentUpon>Form4.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -156,7 +167,9 @@
     <None Include="Resources\lock blue.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Icons8-Windows-8-Security-Key-Security.ico" />
     <Content Include="Pass.xml" />
+    <None Include="Resources\logo.png" />
     <None Include="Resources\Delete File.png" />
     <None Include="Resources\Note.png" />
   </ItemGroup>

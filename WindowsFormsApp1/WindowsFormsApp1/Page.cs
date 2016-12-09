@@ -8,14 +8,16 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 using System.Windows.Forms;
 using System.Collections;
+using System.Drawing;
 
 namespace PaSaver
 {
     /// <summary>
     /// Класс для вкладок TabControl
     /// </summary>
-    public class DataTab 
+    public class DataTab
     {
+        protected Form1 F1;
         protected string type;
         public string Type
         {
@@ -28,7 +30,7 @@ namespace PaSaver
             get { return page; }
             set {; }
         }
-        public DataTab(string type = ""){ this.type = type;page.Text = type;page.Name = type; }
+        public DataTab(Form1 f1,string type = ""){ F1 = f1; this.type = type;page.Text = type;page.Name = type; }
     }
     /// <summary>
     /// Сабкласс вкладки , DataGridViewControl
@@ -41,11 +43,167 @@ namespace PaSaver
             get { return data; }
             set {; }
         }
-        public DataTable(string type = ""):base(type)
+        public DataTable(Form1 f1, string type = "") :base(f1,type)
         {
+            
             this.AddColumnsAndSettings(data);
             AddDataToPage(data);
+            AddEvents();
+            
         }
+
+
+        private void AddEvents()
+        {
+            this.Data.CellMouseClick += this.Dgv_Cell_MouseClick;
+            this.Data.MouseClick += this.Dgv_Gray_Space_MouseClick;
+        }
+        #region Bonus menu
+        private void Dgv_Cell_MouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                ContextMenu m = new ContextMenu();
+
+                m.MenuItems.Add(new MenuItem("Fix", FixCell_Click));
+                m.MenuItems.Add(new MenuItem("Copy", CopyCell_Click));
+                m.MenuItems.Add(new MenuItem("Delete", DeleteRow_Click));
+                MenuItem[] moveto = new MenuItem[F1.ThisTabs.TabPages.Count];
+                int i = 0;
+                foreach (TabPage page in F1.ThisTabs.TabPages)
+                {
+                    moveto[i] = new MenuItem(page.Text);
+                    moveto[i].Tag = page.Tag;
+                    i++;
+                }
+                m.MenuItems.Add(new MenuItem("Move to", moveto));
+                int currentMouseOverRow = ((DataGridView)sender).HitTest(e.X, e.Y).RowIndex;
+                if (currentMouseOverRow >= 0)
+                {
+                    m.MenuItems.Add(new MenuItem(string.Format("Do something to row {0}", currentMouseOverRow.ToString())));
+                }
+                if (((DataGridView)sender).SelectedCells.Count == 1)
+                {
+                    if (((DataGridView)sender).SelectedCells.Count > 0)
+                    {
+                        ((DataGridView)sender).SelectedCells[0].Selected = false;
+                    }
+                    ((DataGridView)sender)[e.ColumnIndex, e.RowIndex].Selected = true;
+                }
+                m.Show(((DataGridView)sender), new Point(e.X, e.Y));
+            }
+        }
+        private void Dgv_Gray_Space_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                if (((DataGridView)sender).HitTest(e.X, e.Y).Type == DataGridViewHitTestType.None)
+                {
+                    ContextMenu m = new ContextMenu();
+                    m.MenuItems.Add(new MenuItem("Add", AddElement_Click));
+                    m.MenuItems[0].Tag = ((DataGridView)sender).Tag;
+                    m.Show(((DataGridView)sender), new Point(e.X, e.Y));
+                }
+            }
+        }
+        /// <summary>
+        /// Кнопка для изменения элемента
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FixCell_Click(object sender, EventArgs e)
+        {
+            foreach (DataGridViewCell cell in ((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.SelectedCells)
+            {
+                cell.Value = F1.ShowAddBox(cell.Value.ToString());
+                if (cell.ColumnIndex == 0)
+                {
+                    ((Row)((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.Rows[cell.RowIndex].Tag).Login = cell.Value.ToString();
+                }
+                else if (cell.ColumnIndex == 1)
+                {
+                    ((Row)((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.Rows[cell.RowIndex].Tag).Password = cell.Value.ToString();
+                }
+                else if (cell.ColumnIndex == 2)
+                {
+                    ((Row)((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.Rows[cell.RowIndex].Tag).Info = cell.Value.ToString();
+                }
+                else
+                {
+                    MessageBox.Show("Wot");
+                }
+            }
+            F1.NeedSave = true;
+            
+        }
+        /// <summary>
+        /// Кнопка для копирования элемента
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CopyCell_Click(object sender, EventArgs e)
+        {
+            if (F1.ThisTabs.TabCount > 0)
+            {
+                if (((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.SelectedCells.Count > 1)
+                {
+                    string text = "|";
+                    foreach (DataGridViewCell cell in ((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.SelectedCells)
+                    {
+                        if (cell.ColumnIndex == 0)
+                        {
+                            text = "|Login: " + cell.Value.ToString() + " " + text;
+                        }
+                        if (cell.ColumnIndex == 1)
+                        {
+                            text = "|Password: " + cell.Value.ToString() + " " + text;
+                        }
+                        if (cell.ColumnIndex == 2)
+                        {
+                            text = "|Info: " + cell.Value.ToString() + " " + text;
+                        }
+                    }
+                    Clipboard.SetText(text);
+                }
+                else if (((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.SelectedCells.Count == 1)
+                {
+                    Clipboard.SetText(((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.SelectedCells[0].Value.ToString());
+                }
+                else { MessageBox.Show("Choice elements to copy"); }
+            }
+        }
+        /// <summary>
+        /// Кнопка добавления элемента
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AddElement_Click(object sender, EventArgs e)
+        {
+            Row r = F1.ShowAddElementBox();
+            if (r.Login != "" && r.Password != "")
+            {
+                ((DataTable)((MenuItem)sender).Tag).AddRowToData(r);
+            }
+            F1.NeedSave = true;
+
+        }
+        /// <summary>
+        /// Кнопка удаления элемента
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DeleteRow_Click(object sender, EventArgs e)
+        {
+            if (F1.ThisTabs.TabCount > 0 && ((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.SelectedCells.Count > 0)
+            {
+                foreach (DataGridViewCell cell in ((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.SelectedCells)
+                {
+                    ((DataTable)F1.ThisTabs.SelectedTab.Tag).DeleteRowFromData(cell.RowIndex);
+                }
+            }
+        }
+        #endregion
+
         /// <summary>
         /// Настройка DataGridView Control
         /// </summary>
@@ -92,6 +250,8 @@ namespace PaSaver
         {
             page.Controls.Add(data);
             page.Tag = this;
+            data.Tag = this;
+
         }
         /// <summary>
         /// Добавление элемента

@@ -42,6 +42,7 @@
             this.Name_TextBox.Name = "Name_TextBox";
             this.Name_TextBox.Size = new System.Drawing.Size(154, 20);
             this.Name_TextBox.TabIndex = 0;
+            this.Name_TextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Enter_KeyDown);
             // 
             // Ok_Button
             // 
@@ -72,6 +73,6 @@
 
         #endregion
         private System.Windows.Forms.Button Ok_Button;
-        public System.Windows.Forms.TextBox Name_TextBox;
+        internal System.Windows.Forms.TextBox Name_TextBox;
     }
 }

@@ -16,13 +16,40 @@ namespace PaSaver
 {
     public partial class Form1 : Form
     {
-        private XmlReWr xrw;
-        private string Path,keytext;
+        private XmlReWr xw,xr;
+        public TabControl ThisTabs
+        {
+            get { return Tabs; }
+            set {; }
+        }
+        private string path,keytext;
+        private string Path
+        {
+            get { return path; }
+            set { path = value;saveToolStripMenuItem.Enabled = true; }
+        }
+        private ArrayList k;
+        private ArrayList Keys
+        {
+            get
+            {
+                k = new ArrayList();
+                foreach(ToolStripTextBox tb in KeyMenu.DropDownItems)
+                {
+                    if (tb.Text != keytext && tb.Text != " " && tb.Text != "")
+                    {
+                        k.Add(tb.Text.ToString());
+                    }
+                }
+                return k;
+            }
+            set {; }
+        }
         private bool needsave = false;
         /// <summary>
         /// Параметр ответа - Нужно ли сохранение или создание для файла
         /// </summary>
-        private bool NeedSave
+        public bool NeedSave
         {
             get { return needsave; }
             set
@@ -47,12 +74,24 @@ namespace PaSaver
         {
             InitializeComponent();
             keytext = "Write key here";
-            Key1.Text = keytext;
-            Key2.Text = keytext;
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            KeyStart();
+        }
+        private void KeyStart()
+        {
+            Form4 DialogForm = new Form4();
+            if (DialogForm.ShowDialog(this) == DialogResult.OK)
+            {
+                toolStripTextBox1.Text = DialogForm.KeyBox1.Text;
+                toolStripTextBox2.Text = DialogForm.KeyBox2.Text;
+                toolStripTextBox3.Text = DialogForm.KeyBox3.Text;
+                toolStripTextBox4.Text = DialogForm.KeyBox4.Text;
+                toolStripTextBox5.Text = DialogForm.KeyBox5.Text;
+            }
+            else { this.Close(); }
+            
         }
         /// <summary>
         /// Кнопка добавления вкладки
@@ -60,10 +99,19 @@ namespace PaSaver
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void AddTab_Click(object sender, EventArgs e)
-        {
-            DataTab dt = new DataTable(ShowAddBox());
-            TabTypes.Controls.Add(dt.Page);
-            NeedSave = true;
+        { 
+            string sab = ShowAddBox();
+            if (sab != "")
+            {
+                DataTable dt = new DataTable(this,sab);
+                ThisTabs.Controls.Add(dt.Page);
+                NeedSave = true;
+            }
+            else
+            {
+                MessageBox.Show("Write name!");
+            }
+            
         }
         /// <summary>
         /// Кнопка удаления вкладки
@@ -72,81 +120,10 @@ namespace PaSaver
         /// <param name="e"></param>
         private void DeleteTab_Click(object sender, EventArgs e)
         {
-            TabTypes.TabPages.RemoveAt(TabTypes.SelectedIndex);
-            NeedSave = true;
-        }
-        /// <summary>
-        /// Всплывание окна для ввода названия новой вкладки
-        /// </summary>
-        /// <returns>Имя вкладки</returns>
-        private string ShowAddBox(string value = "")
-        {
-            Form2 DialogForm = new Form2();
-            DialogForm.Name_TextBox.Text = value;
-            if (DialogForm.ShowDialog(this) == DialogResult.OK)
+            if (ThisTabs.TabPages.Count > 0)
             {
-                return DialogForm.Name_TextBox.Text;
-            }
-            else
-            {
-                return value;
-            }
-        }
-        /// <summary>
-        /// Всплывание окна для ввода данных о элементе и последующего создания на конкретной вкладке(фокус)
-        /// </summary>
-        /// <returns> Созданный объект класса ряд </returns>
-        private Row ShowAddElementBox()
-        {
-            if(TabTypes.TabCount > 0)
-            {
-                Form3 DialogForm = new Form3();
-                if (DialogForm.ShowDialog(this) == DialogResult.OK && DialogForm.Login_TextBox.Text != "" && DialogForm.Password_TextBox.Text != "")
-                {
-                    return (new Row(DialogForm.Login_TextBox.Text, DialogForm.Password_TextBox.Text, DialogForm.Info_TextBox.Text));
-                }
-                else return new Row();
-            }
-            else
-            {
-                MessageBox.Show("Need to add tab first!", "Tab error");
-                return null;
-            }
-        }
-        /// <summary>
-        /// Кнопка добавления элемента
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AddElement_Click(object sender, EventArgs e)
-        {
-            if (TabTypes.TabCount > 0)
-            {
-                Row r = ShowAddElementBox();
-                if (r.Login != "" && r.Password != "")
-                {
-                    ((DataTable)TabTypes.SelectedTab.Tag).AddRowToData(r);
-                }
+                ThisTabs.TabPages.RemoveAt(ThisTabs.SelectedIndex);
                 NeedSave = true;
-            }
-            else
-            {
-                MessageBox.Show("Need to add tab first!", "Tab error");
-            }
-        }
-        /// <summary>
-        /// Кнопка удаления элемента
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DeleteElement_Click(object sender, EventArgs e)
-        {
-            if (TabTypes.TabCount > 0&& ((DataTable)TabTypes.SelectedTab.Tag).Data.SelectedCells.Count > 0)
-            {
-                foreach (DataGridViewCell cell in ((DataTable)TabTypes.SelectedTab.Tag).Data.SelectedCells)
-                {
-                    ((DataTable)TabTypes.SelectedTab.Tag).DeleteRowFromData(cell.RowIndex);
-                }
             }
         }
         /// <summary>
@@ -156,74 +133,24 @@ namespace PaSaver
         /// <param name="e"></param>
         private void SaveToolStrip_Click(object sender, EventArgs e)
         {
-            NeedSave = false;
-        }
-        /// <summary>
-        /// Кнопка для изменения элемента
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void FixElement_Click(object sender, EventArgs e)
-        {
-            if (TabTypes.TabCount > 0 && ((DataTable)TabTypes.SelectedTab.Tag).Data.SelectedCells.Count > 0)
+            if (Path != "")
             {
-                foreach (DataGridViewCell cell in ((DataTable)TabTypes.SelectedTab.Tag).Data.SelectedCells)
+                if (Keys.Count > 0)
                 {
-                    cell.Value = ShowAddBox(cell.Value.ToString());
-                    if (cell.ColumnIndex == 0)
+                    List<DataTable> Pages = new List<DataTable>();
+                    foreach (TabPage page in ThisTabs.TabPages)
                     {
-                        ((Row)((DataTable)TabTypes.SelectedTab.Tag).Data.Rows[cell.RowIndex].Tag).Login = cell.Value.ToString();
+                        Pages.Add((DataTable)page.Tag);
                     }
-                    else if (cell.ColumnIndex == 1)
+                    this.xw = new XmlReWr(this,Path, Keys, Pages);
+                    using (XmlWriter writer = XmlWriter.Create(Path, new XmlWriterSettings { ConformanceLevel = ConformanceLevel.Document, Encoding = Encoding.Unicode }))
                     {
-                        ((Row)((DataTable)TabTypes.SelectedTab.Tag).Data.Rows[cell.RowIndex].Tag).Password = cell.Value.ToString();
+                        xw.WriteXml(writer);
                     }
-                    else if (cell.ColumnIndex == 2)
-                    {
-                        ((Row)((DataTable)TabTypes.SelectedTab.Tag).Data.Rows[cell.RowIndex].Tag).Info = cell.Value.ToString();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Wot");
-                    }
+                    ShowNotify("Xml file created");
+                    NeedSave = false;
                 }
-                NeedSave = true;
-            }
-        }
-        /// <summary>
-        /// Кнопка для копирования элемента
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void CopyToolStrip_Click(object sender, EventArgs e)
-        {
-            if (TabTypes.TabCount > 0)
-            {
-                if (((DataTable)TabTypes.SelectedTab.Tag).Data.SelectedCells.Count > 1)
-                {
-                    string text = "|";
-                    foreach (DataGridViewCell cell in ((DataTable)TabTypes.SelectedTab.Tag).Data.SelectedCells)
-                    {
-                        if (cell.ColumnIndex == 0)
-                        {
-                            text = "|Login: " + cell.Value.ToString() + " " + text;
-                        }
-                        if (cell.ColumnIndex == 1)
-                        {
-                            text = "|Password: " + cell.Value.ToString() + " " + text;
-                        }
-                        if (cell.ColumnIndex == 2)
-                        {
-                            text = "|Info: " + cell.Value.ToString() + " " + text;
-                        }
-                    }
-                    Clipboard.SetText(text);
-                }
-                else if (((DataTable)TabTypes.SelectedTab.Tag).Data.SelectedCells.Count == 1)
-                {
-                    Clipboard.SetText(((DataTable)TabTypes.SelectedTab.Tag).Data.SelectedCells[0].Value.ToString());
-                }
-                else { MessageBox.Show("Choice elements to copy"); }
+                else { MessageBox.Show("Please write ur keys for encoding information!", "Key error"); }
             }
         }
         /// <summary>
@@ -233,31 +160,30 @@ namespace PaSaver
         /// <param name="e"></param>
         private void СreateXmlToolStrip_Click(object sender, EventArgs e)
         {
-            if (Key1.Text != keytext && Key2.Text != keytext)
+            if (Keys.Count>0)
             {
-                List<DataTable> List = new List<DataTable>();
-                foreach (TabPage page in TabTypes.TabPages)
+                List<DataTable> Pages = new List<DataTable>();
+                foreach (TabPage page in ThisTabs.TabPages)
                 {
-                    List.Add((DataTable)page.Tag);
+                    Pages.Add((DataTable)page.Tag);
                 }
-
+                OpenDirectory.Description = "Choice folder";
                 if (OpenDirectory.ShowDialog() == DialogResult.OK)
                 {
-                    Path = OpenDirectory.InitialDirectory;
-
+                    Path = OpenDirectory.SelectedPath;
                 }
                 else
                 { return; }
-
-                this.xrw = new XmlReWr(Path + "\\PaSaver.xml", Key1.Text, Key1.Text, List);
-                using (XmlWriter writer = XmlWriter.Create(Path + "\\PaSaver.xml"))
+                Path = Path + "\\PaSaver.xml";
+                this.xw = new XmlReWr(this,Path, Keys, Pages);
+                using (XmlWriter writer = XmlWriter.Create(Path, new XmlWriterSettings { ConformanceLevel = ConformanceLevel.Document, Encoding = Encoding.Unicode }))
                 {
-                    XmlSerializer xmlserialize = new XmlSerializer(typeof(XmlReWr));
-                    xrw.WriteXml(writer);
+                    xw.WriteXml(writer);
                 }
                 ShowNotify("Xml file created");
+                NeedSave = false;
             }
-            else { MessageBox.Show("Write keys!","Key error"); }
+            else { MessageBox.Show("Please write ur keys for encoding information!", "Key error"); }
         }
         /// <summary>
         /// Кнопка для открытия XML файла
@@ -266,11 +192,20 @@ namespace PaSaver
         /// <param name="e"></param>
         private void OpenXmlToolStrip_Click(object sender, EventArgs e)
         {
-            if (Key1.Text != keytext && Key2.Text != keytext)
+            if (Keys.Count > 0)
             {
                 if (OpenXml.ShowDialog() == DialogResult.OK)
                 {
                     Path = OpenXml.FileName;
+                }
+                this.xr = new XmlReWr(this,Path, Keys);
+                using (XmlReader reader = XmlReader.Create(Path))
+                {
+                    xr.ReadXml(reader);
+                }
+                foreach(DataTable dt in xr.Pages)
+                {
+                    ThisTabs.TabPages.Add(dt.Page);
                 }
             }
             else { MessageBox.Show("Please write ur keys for decoding information!","Key error"); }
@@ -284,6 +219,36 @@ namespace PaSaver
         {
             notifyIcon1.BalloonTipText = text;
             notifyIcon1.ShowBalloonTip(tip);
+        }
+        /// <summary>
+        /// Всплывание окна для ввода данных о элементе и последующего создания на конкретной вкладке(фокус)
+        /// </summary>
+        /// <returns> Созданный объект класса ряд </returns>
+        public Row ShowAddElementBox()
+        {
+            Form3 DialogForm = new Form3();
+            if (DialogForm.ShowDialog(this) == DialogResult.OK && DialogForm.Login_TextBox.Text != "" && DialogForm.Password_TextBox.Text != "")
+            {
+                return (new Row(DialogForm.Login_TextBox.Text, DialogForm.Password_TextBox.Text, DialogForm.Info_TextBox.Text));
+            }
+            else return new Row();
+        }
+        /// <summary>
+        /// Всплывание окна для ввода названия новой вкладки
+        /// </summary>
+        /// <returns>Имя вкладки</returns>
+        public string ShowAddBox(string value = "")
+        {
+            Form2 DialogForm = new Form2();
+            DialogForm.Name_TextBox.Text = value;
+            if (DialogForm.ShowDialog(this) == DialogResult.OK)
+            {
+                return DialogForm.Name_TextBox.Text;
+            }
+            else
+            {
+                return value;
+            }
         }
     }
 }

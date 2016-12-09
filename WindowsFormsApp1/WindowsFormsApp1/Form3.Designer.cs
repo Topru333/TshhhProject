@@ -44,6 +44,7 @@
             this.Login_TextBox.Name = "Login_TextBox";
             this.Login_TextBox.Size = new System.Drawing.Size(128, 20);
             this.Login_TextBox.TabIndex = 0;
+            this.Login_TextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Enter_KeyDown);
             // 
             // Password_TextBox
             // 
@@ -51,6 +52,7 @@
             this.Password_TextBox.Name = "Password_TextBox";
             this.Password_TextBox.Size = new System.Drawing.Size(128, 20);
             this.Password_TextBox.TabIndex = 1;
+            this.Password_TextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Enter_KeyDown);
             // 
             // Info_TextBox
             // 
@@ -58,6 +60,7 @@
             this.Info_TextBox.Name = "Info_TextBox";
             this.Info_TextBox.Size = new System.Drawing.Size(128, 20);
             this.Info_TextBox.TabIndex = 2;
+            this.Info_TextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Enter_KeyDown);
             // 
             // label1
             // 
@@ -85,9 +88,9 @@
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label3.Location = new System.Drawing.Point(12, 67);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(65, 17);
+            this.label3.Size = new System.Drawing.Size(69, 17);
             this.label3.TabIndex = 5;
-            this.label3.Text = "Shor info";
+            this.label3.Text = "Short info";
             // 
             // Add_button
             // 
@@ -124,8 +127,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button Add_button;
-        public System.Windows.Forms.TextBox Login_TextBox;
-        public System.Windows.Forms.TextBox Password_TextBox;
-        public System.Windows.Forms.TextBox Info_TextBox;
+        internal System.Windows.Forms.TextBox Login_TextBox;
+        internal System.Windows.Forms.TextBox Password_TextBox;
+        internal System.Windows.Forms.TextBox Info_TextBox;
     }
 }

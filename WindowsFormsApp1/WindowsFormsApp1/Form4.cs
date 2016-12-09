@@ -10,18 +10,16 @@ using System.Windows.Forms;
 
 namespace PaSaver
 {
-    public partial class Form2 : Form
+    public partial class Form4 : Form
     {
-        public Form2()
+        public Form4()
         {
             InitializeComponent();
         }
 
-        private void Form2_Load(object sender, EventArgs e)
-        { }
         private void Enter_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter)
+            if(e.KeyCode == Keys.Enter)
             {
                 this.DialogResult = DialogResult.OK;
                 this.Close();

@@ -16,5 +16,13 @@ namespace PaSaver
         {
             InitializeComponent();
         }
+        private void Enter_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+        }
     }
 }
