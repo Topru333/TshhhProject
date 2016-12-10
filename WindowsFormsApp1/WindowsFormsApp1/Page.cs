@@ -72,16 +72,11 @@ namespace PaSaver
                 int i = 0;
                 foreach (TabPage page in F1.ThisTabs.TabPages)
                 {
-                    moveto[i] = new MenuItem(page.Text);
+                    moveto[i] = new MenuItem(page.Text, MoveRow_Click);
                     moveto[i].Tag = page.Tag;
                     i++;
                 }
                 m.MenuItems.Add(new MenuItem("Move to", moveto));
-                int currentMouseOverRow = ((DataGridView)sender).HitTest(e.X, e.Y).RowIndex;
-                if (currentMouseOverRow >= 0)
-                {
-                    m.MenuItems.Add(new MenuItem(string.Format("Do something to row {0}", currentMouseOverRow.ToString())));
-                }
                 if (((DataGridView)sender).SelectedCells.Count == 1)
                 {
                     if (((DataGridView)sender).SelectedCells.Count > 0)
@@ -194,10 +189,26 @@ namespace PaSaver
         /// <param name="e"></param>
         private void DeleteRow_Click(object sender, EventArgs e)
         {
-            if (F1.ThisTabs.TabCount > 0 && ((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.SelectedCells.Count > 0)
+            if (((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.SelectedCells.Count > 0)
             {
                 foreach (DataGridViewCell cell in ((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.SelectedCells)
                 {
+                    ((DataTable)F1.ThisTabs.SelectedTab.Tag).DeleteRowFromData(cell.RowIndex);
+                }
+            }
+        }
+        /// <summary>
+        /// Кнопка перемещения с ряда с одной вкладки на другую
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MoveRow_Click(object sender, EventArgs e)
+        {
+            if (((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.SelectedCells.Count > 0)
+            {
+                foreach (DataGridViewCell cell in ((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.SelectedCells)
+                {
+                    ((DataTable)((MenuItem)sender).Tag).AddRowToData((Row)((DataTable)F1.ThisTabs.SelectedTab.Tag).Data.Rows[cell.RowIndex].Tag);
                     ((DataTable)F1.ThisTabs.SelectedTab.Tag).DeleteRowFromData(cell.RowIndex);
                 }
             }
@@ -269,18 +280,6 @@ namespace PaSaver
         public void DeleteRowFromData(int index)
         {
             data.Rows.RemoveAt(index);
-        }
-        /// <summary>
-        /// Изменение элемента DataGridView
-        /// </summary>
-        /// <param name="index">Номер ряда</param>
-        /// <param name="r">Новый объект ряда</param>
-        public void ChangeRow(int index,Row r)
-        {
-            data.Rows[index].Cells[0].Value = r.Login;
-            data.Rows[index].Cells[1].Value = r.Password;
-            data.Rows[index].Cells[2].Value = r.Info;
-            ((Row)data.Rows[index].Tag).CopyElements(r);
         }
     }
     /// <summary>
