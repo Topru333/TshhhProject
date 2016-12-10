@@ -83,7 +83,11 @@ namespace PaSaver
                     {
                         ((DataGridView)sender).SelectedCells[0].Selected = false;
                     }
-                    ((DataGridView)sender)[e.ColumnIndex, e.RowIndex].Selected = true;
+                    try
+                    {
+                        ((DataGridView)sender)[e.ColumnIndex, e.RowIndex].Selected = true;
+                    }
+                    catch (Exception) { }
                 }
                 m.Show(((DataGridView)sender), new Point(e.X, e.Y));
             }

@@ -67,8 +67,10 @@
             this.MinimizeBox = false;
             this.Name = "Form2";
             this.Opacity = 0.8D;
+            this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.TopMost = true;
             this.Load += new System.EventHandler(this.Form2_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

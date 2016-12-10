@@ -110,6 +110,7 @@
             this.Controls.Add(this.Info_TextBox);
             this.Controls.Add(this.Password_TextBox);
             this.Controls.Add(this.Login_TextBox);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Form3";

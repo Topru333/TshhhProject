@@ -47,8 +47,8 @@ namespace PaSaver
 
                 int c = (Array.IndexOf(characters, symbol) + Array.IndexOf(characters, key[key_index])) % N;
                 result += characters[c];
-                key_index++;
                 if ((key_index + 1) == key.Length) key_index = 0;
+                key_index++;
             }
             return result; 
         }
@@ -78,8 +78,8 @@ namespace PaSaver
             {
                 int p = ((Array.IndexOf(characters, symbol) + N) - Array.IndexOf(characters, key[key_index])) % N;
                 result += characters[p];
-                key_index++;
                 if ((key_index + 1) == key.Length) key_index = 0;
+                key_index++;
             }
             return result;
         }
